@@ -10,8 +10,8 @@ void calc(vector<char> sepaSymbol, vector<double> sepaNum);
 void messageLoop() {
     string rawInput;
     cout << "Simple Calc by KiraMint Ver 1.0\tUse \"quit\" or \"exit\" to terminate the program." << endl;
-    cout << "Input your expression, the calculator will calculate from left to right.\n \
-Note:\"()\" is not support in this version!" << endl;
+    cout << "Input your expression, the calculator will calculate from left to right.\n\
+Note:\"()\" is not support in this version!\n" << endl;
     while (true)
     {
         cout << ">>> ";
@@ -44,7 +44,8 @@ void messageProcess(string rawInput) {
             test == symbolSet[0] || \
             test == symbolSet[1] || \
             test == symbolSet[2] || \
-            test == symbolSet[3])) {
+            test == symbolSet[3] || \
+            test == '.')) {
             cerr << "Invade Input!" << endl;
             return;
         }
