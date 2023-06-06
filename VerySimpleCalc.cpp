@@ -3,20 +3,20 @@
 #include <vector>
 using namespace std;
 
-void messageLoop();
-void messageProcess(string rawInput);
-void calc(vector<char> sepaSymbol, vector<double> sepaNum);
+void messageLoop();     //Calculator terminal
+void messageProcess(string rawInput);   //Check and spilt Input
+void calc(vector<char> sepaSymbol, vector<double> sepaNum); //Calc directory from left to right
+void advancedCalc(vector<char> sepaSymbol, vector<double> sepaNum); //Calc follow `*`,`/`,`+`,`-`
 
 void messageLoop() {
     string rawInput;
-    cout << "Simple Calc by KiraMint Ver 1.0\tUse \"quit\" or \"exit\" to terminate the program." << endl;
-    cout << "Input your expression, the calculator will calculate from left to right.\n\
-Note:\"()\" is not support in this version!\n" << endl;
+    cout << "Simple Calc by KiraMint Ver 1.0\nUse \"quit\" or \"exit\" to terminate the program." << endl;
+    cout << "Note:\"()\" is not avaliable in this version!\n" << endl;
     while (true)
     {
         cout << ">>> ";
         getline(cin, rawInput);
-        if (rawInput != "") {
+        if (rawInput != "") {   //Skip empty input
             messageProcess(rawInput);
         }
     }
@@ -30,14 +30,12 @@ void messageProcess(string rawInput) {
     if (rawInput.find("quit") != rawInput.npos|| rawInput.find("exit") != rawInput.npos) {
         exit(0);
     }
-
     //Delete backspace
     while (rawInput.find(" ") != rawInput.npos)
     {
         rawInput.erase(rawInput.find(" "), 1);
     }
-    //check input
-
+    //Check input
     for (int letter = 0; letter < rawInput.length(); letter++) {
         char test = rawInput.at(letter);
         if (!(test >= 48 && test <= 57 || \
@@ -50,7 +48,6 @@ void messageProcess(string rawInput) {
             return;
         }
     }
-
     for (int syb = 0; syb < symbols; syb++) {
         if (rawInput.at(rawInput.length() - 1) == symbolSet[syb]) {
             cerr << "Invade Input!" << endl;
@@ -61,7 +58,13 @@ void messageProcess(string rawInput) {
     rawInput.append("#");
     //Add "0" before string
     rawInput.insert(0, "0");
-    //Search and sort
+    /*
+    Search and sort
+    It will be like that:
+    raw input: 1+2*3/4-5
+    sepaSymbol:+ * / - # ("#" mark as end)
+    sepaNum:   1 2 3 4 5
+    */
     int last = 0;
     string sub;
     for (int content = 0; content < rawInput.length(); content++)
@@ -78,8 +81,11 @@ void messageProcess(string rawInput) {
         }
     }
 
-    calc(sepaSymbol, sepaNum);
+    //calc(sepaSymbol, sepaNum); //Old function, disabeled
+    advancedCalc(sepaSymbol, sepaNum);  //Calculate "*" and "/"
 }
+
+//Calculate "+" "-" when it is use by function advancedCalc
 void calc(vector<char> sepaSymbol, vector<double> sepaNum) {
     double result = sepaNum[0];
     for (int i = 0; i < sepaSymbol.size(); i++) {
@@ -105,6 +111,65 @@ void calc(vector<char> sepaSymbol, vector<double> sepaNum) {
         }
     }
     cout << result << endl;
+}
+
+void advancedCalc(vector<char> sepaSymbol, vector<double> sepaNum) {    //Calculate "*" and "/"
+    vector<char> sepaSymbolSort;
+    vector<double> sepaNumSort;
+    vector<double>::iterator num = sepaNum.begin();
+    double op1, op2;
+    for (vector<char>::iterator it = sepaSymbol.begin(); it != sepaSymbol.end(); it++) {
+        switch (*it)
+        {
+        case'*':
+            op1 = *num; 
+            num++;
+            op2 = *num;
+            sepaNumSort.push_back(op1*op2);
+            it++;
+            sepaSymbolSort.push_back(*it);
+            break;
+        case'/':
+            op1 = *num; 
+            num++;
+            op2 = *num;
+            sepaNumSort.push_back(op1 / op2);
+            it++;
+            sepaSymbolSort.push_back(*it);
+            break;
+        case'+':
+            sepaSymbolSort.push_back(*it);
+            sepaNumSort.push_back(*num);
+            
+            break;
+        case'-':
+            sepaSymbolSort.push_back(*it);
+            sepaNumSort.push_back(*num);
+            break;
+        case'#':
+            sepaSymbolSort.push_back(*it);
+            sepaNumSort.push_back(*num);
+            break;
+        default:
+            cerr << "System ERROR" << endl;
+            break;
+        }
+        num++;
+    }
+    sepaSymbol = sepaSymbolSort;
+    sepaNum = sepaNumSort;
+    /*
+    There is a bug that sometime this function cant calculate all of the"*" "/",
+    but I am lazy and don't want to fix it. So let do it one more time.
+    */
+    for (int sepa = 0; sepa < sepaSymbolSort.size(); sepa++) {
+        if (sepaSymbolSort[sepa] == '*' || sepaSymbolSort[sepa] == '/') {
+            advancedCalc(sepaSymbol, sepaNum);
+            return;
+        }
+    }
+    calc(sepaSymbol, sepaNum);  //Calculate "+" "-"
+    return;
 }
 
 int main()
