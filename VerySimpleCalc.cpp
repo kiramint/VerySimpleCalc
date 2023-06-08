@@ -3,10 +3,16 @@
 #include <vector>
 using namespace std;
 
-void messageLoop();     //Calculator terminal
-void messageProcess(string rawInput);   //Check and spilt Input
-void calc(vector<char> sepaSymbol, vector<double> sepaNum); //Calc directory from left to right
-void advancedCalc(vector<char> sepaSymbol, vector<double> sepaNum); //Calc follow `*`,`/`,`+`,`-`
+//Declaration of functions
+
+//Calculator terminal
+void messageLoop();
+//Check and spilt Input
+void messageProcess(string rawInput);   
+//Calc directory from left to right
+void calc(vector<char> sepaSymbol, vector<double> sepaNum);
+//Calc follow `*`,`/`,`+`,`-`
+void advancedCalc(vector<char> sepaSymbol, vector<double> sepaNum);
 
 void messageLoop() {
     string rawInput;
@@ -17,13 +23,19 @@ void messageLoop() {
         cout << ">>> ";
         getline(cin, rawInput);
         if (rawInput != "") {   //Skip empty input
-            messageProcess(rawInput);
+            try {
+                messageProcess(rawInput);
+            }
+            catch (...) {
+                cerr << "\033[0;31mUnknown System ERROR\033[0m" << endl;
+            }
         }
     }
 }
+
 void messageProcess(string rawInput) {
-    const char symbols = 5;
-    const char symbolSet[symbols] = { '+','-','*','/','#' };
+    const char symbols = 6;
+    const char symbolSet[symbols] = { '+','-','*','/','#','.'};
     vector<char> sepaSymbol;
     vector<double> sepaNum;
     //If user want to quit
@@ -43,15 +55,29 @@ void messageProcess(string rawInput) {
             test == symbolSet[1] || \
             test == symbolSet[2] || \
             test == symbolSet[3] || \
-            test == '.')) {
-            cerr << "Invade Input!" << endl;
+            test == symbolSet[5])) {
+            cerr << "\033[0;31mInvade Input!\033[0m" << endl;
             return;
-        }
+        }        
     }
-    for (int syb = 0; syb < symbols; syb++) {
-        if (rawInput.at(rawInput.length() - 1) == symbolSet[syb]) {
-            cerr << "Invade Input!" << endl;
-            return;
+    //Chech dual symbol like:'1**3'or'2+-9'
+    for (int letter = 0; letter < rawInput.length() - 1; letter++) {
+        char sb1 = rawInput.at(letter);
+        char sb2 = rawInput.at(letter + 1);
+        bool bsb1 = false, bsb2 = false;
+        if (sb1 == symbolSet[0] || \
+            sb1 == symbolSet[1] || \
+            sb1 == symbolSet[2] || \
+            sb1 == symbolSet[3] || \
+            sb1 == symbolSet[5]) {
+            if (sb2 == symbolSet[0] || \
+                sb2 == symbolSet[1] || \
+                sb2 == symbolSet[2] || \
+                sb2 == symbolSet[3] || \
+                sb2 == symbolSet[5]) {
+                cerr << "\033[0;31mDual Symbol!\033[0m" << endl;
+                return;
+            }
         }
     }
     //Add "#" after string
@@ -106,11 +132,16 @@ void calc(vector<char> sepaSymbol, vector<double> sepaNum) {
         case '#':
             break;
         default:
-            cerr << "Syntax ERROR" << endl;
+            cerr << "\033[0;31mSyntax ERROR\033[0m" << endl;
             break;
         }
     }
-    cout << result << endl;
+    if (isinf(result)) {
+        cerr << "\033[0;31mERROR: Your result is out of range or you divide a number by zero\033[0m" << endl;
+    }
+    else {
+        cout << result << endl;
+    }
 }
 
 void advancedCalc(vector<char> sepaSymbol, vector<double> sepaNum) {    //Calculate "*" and "/"
@@ -151,7 +182,7 @@ void advancedCalc(vector<char> sepaSymbol, vector<double> sepaNum) {    //Calcul
             sepaNumSort.push_back(*num);
             break;
         default:
-            cerr << "System ERROR" << endl;
+            cerr << "\033[0;31mSystem ERROR\033[0m" << endl;
             break;
         }
         num++;
