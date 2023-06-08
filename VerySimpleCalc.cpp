@@ -60,26 +60,38 @@ void messageProcess(string rawInput) {
             return;
         }        
     }
-    //Chech dual symbol like:'1**3'or'2+-9'
-    for (int letter = 0; letter < rawInput.length() - 1; letter++) {
+    for (int letter = 0; letter < rawInput.length(); letter++) {
         char sb1 = rawInput.at(letter);
-        char sb2 = rawInput.at(letter + 1);
-        bool bsb1 = false, bsb2 = false;
-        if (sb1 == symbolSet[0] || \
-            sb1 == symbolSet[1] || \
-            sb1 == symbolSet[2] || \
-            sb1 == symbolSet[3] || \
-            sb1 == symbolSet[5]) {
-            if (sb2 == symbolSet[0] || \
-                sb2 == symbolSet[1] || \
-                sb2 == symbolSet[2] || \
-                sb2 == symbolSet[3] || \
-                sb2 == symbolSet[5]) {
-                cerr << "\033[0;31mDual Symbol!\033[0m" << endl;
+        if (letter == rawInput.length() - 1) {  //Check symbol at end of the input
+            if (sb1 == symbolSet[0] || \
+                sb1 == symbolSet[1] || \
+                sb1 == symbolSet[2] || \
+                sb1 == symbolSet[3] || \
+                sb1 == symbolSet[5]) {
+                cerr << "\033[0;31mCan't Be End By a Symbol\033[0m" << endl;
                 return;
             }
         }
+        else
+        {   //Chech dual symbol like:'1**3'or'2+-9'
+            char sb2 = rawInput.at(letter + 1);
+            if (sb1 == symbolSet[0] || \
+                sb1 == symbolSet[1] || \
+                sb1 == symbolSet[2] || \
+                sb1 == symbolSet[3] || \
+                sb1 == symbolSet[5]) {
+                if (sb2 == symbolSet[0] || \
+                    sb2 == symbolSet[1] || \
+                    sb2 == symbolSet[2] || \
+                    sb2 == symbolSet[3] || \
+                    sb2 == symbolSet[5]) {
+                    cerr << "\033[0;31mDual Symbol!\033[0m" << endl;
+                    return;
+                }
+            }
+        }
     }
+    
     //Add "#" after string
     rawInput.append("#");
     //Add "0" before string
@@ -95,7 +107,7 @@ void messageProcess(string rawInput) {
     string sub;
     for (int content = 0; content < rawInput.length(); content++)
     {
-        for (int syb = 0; syb < symbols; syb++)
+        for (int syb = 0; syb < symbols - 1; syb++) //symbols - 1 is for fractional part
         {
             if (rawInput.at(content) == symbolSet[syb])
             {
@@ -106,8 +118,6 @@ void messageProcess(string rawInput) {
             }
         }
     }
-
-    //calc(sepaSymbol, sepaNum); //Old function, disabeled
     advancedCalc(sepaSymbol, sepaNum);  //Calculate "*" and "/"
 }
 
@@ -123,16 +133,10 @@ void calc(vector<char> sepaSymbol, vector<double> sepaNum) {
         case '-':
             result -= sepaNum[i + 1];
             break;
-        case '*':
-            result *= sepaNum[i + 1];
-            break;
-        case '/':
-            result /= sepaNum[i + 1];
-            break;
         case '#':
             break;
         default:
-            cerr << "\033[0;31mSyntax ERROR\033[0m" << endl;
+            throw("Unknown System ERROR");
             break;
         }
     }
@@ -191,7 +195,7 @@ void advancedCalc(vector<char> sepaSymbol, vector<double> sepaNum) {    //Calcul
     sepaNum = sepaNumSort;
     /*
     There is a bug that sometime this function cant calculate all of the"*" "/",
-    but I am lazy and don't want to fix it. So let do it one more time.
+    but I am lazy and don't want to fix it. So let do it one more time.（又不是不能用）
     */
     for (int sepa = 0; sepa < sepaSymbolSort.size(); sepa++) {
         if (sepaSymbolSort[sepa] == '*' || sepaSymbolSort[sepa] == '/') {
